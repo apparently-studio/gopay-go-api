@@ -7,36 +7,49 @@ import (
 	"strconv"
 )
 
+// Payment body used when creating Payment.
 type PaymentBody struct {
-	Payer            Payer             `json:"payer,omitempty"`             // Objekt popisující plátce platby
-	Target           Target            `json:"target,omitempty"`            // Objekt popisující příjemce platby
-	Amount           int64             `json:"amount,omitempty"`            // Částka v haléřích
-	Currency         string            `json:"currency,omitempty"`          // Určuje měnu platby, formát měny odpovídá [ISO 4217](http://www.iso.org/iso/home/standards/currency_codes.htm)
-	OrderNumber      string            `json:"order_number,omitempty"`      // Identifikace objednávky v rámci prodejního místa (ID objednávky)
-	OrderDescription string            `json:"order_description,omitempty"` // Popis objednávky
-	Items            []Items           `json:"items,omitempty"`             // Detailně rozepsané jednotlivé položky objednávky
+	Payer            Payer             `json:"payer,omitempty"`             // Payment method settings and payer information
+	Target           Target            `json:"target,omitempty"`            // Payee information
+	Amount           int64             `json:"amount,omitempty"`            // Payment amount in cents
+	Currency         string            `json:"currency,omitempty"`          // Payment currency [ISO 4217](http://www.iso.org/iso/home/standards/currency_codes.htm)
+	OrderNumber      string            `json:"order_number,omitempty"`      // Merchant’s order id, alphanumeric
+	OrderDescription string            `json:"order_description,omitempty"` // Order description, alphanumeric
+	Items            []Items           `json:"items,omitempty"`             // Details of the payment items
 	EET              *EET              `json:"eet,omitempty"`               // EET údaje (povinné pro funkci EET)
-	Callback         Callback          `json:"callback,omitempty"`          // Návratové URL a notifikační URL pro oznámení změny stavu platby
-	AdditionalParams []AdditionalParam `json:"additional_params,omitempty"` // Doplňkové parametry platby
-	Lang             string            `json:"lang,omitempty"`              // Parametr definuje jazyk platby
-	Preauthorization bool              `json:"preauthorization,omitempty"`  // Pokud se jedná o předautorizovanou platbu, je předáván s hodnotou true
-	Recurrence       Recurrence        `json:"recurrence,omitempty"`        // Pokud se jedná o opakovanou platbu, je předáván objekt, popisující opakování platby
+	Callback         Callback          `json:"callback,omitempty"`          // Callback URL for processing of the payment result / Notification URL for processing of change of payment status
+	AdditionalParams []AdditionalParam `json:"additional_params,omitempty"` // Additional payment parameters
+	Lang             string            `json:"lang,omitempty"`              // Payment gateway language
+	Preauthorization bool              `json:"preauthorization,omitempty"`  // true if the payment should be preauthorized
+	Recurrence       Recurrence        `json:"recurrence,omitempty"`        // Contains object describing recurrence, if the payment should be recurrent
 }
 
+// Payment struct returned from REST API.
 type Payment struct {
-	ID               int64             `json:"id,omitempty"`                // ID platby
-	OrderNumber      string            `json:"order_number,omitempty"`      // ID objednávky
-	State            PaymentState      `json:"state,omitempty"`             // Stav platby
-	Amount           int64             `json:"amount,omitempty"`            // Částka v haléřích
-	Currency         string            `json:"currency,omitempty"`          // Určuje měnu platby, formát měny odpovídá [ISO 4217](http://www.iso.org/iso/home/standards/currency_codes.htm)
-	Payer            Payer             `json:"payer,omitempty"`             // Objekt popisující plátce platby
-	Target           Target            `json:"target,omitempty"`            // Objekt popisující příjemce platby
-	AdditionalParams []AdditionalParam `json:"additional_params,omitempty"` // Doplňkové parametry platby
-	Lang             string            `json:"string,omitempty"`            // Parametr definuje jazyk platby
-	GWURL            string            `json:"gw_url,omitempty"`            // URL pro inicializaci platební brány
+	ID               int64             `json:"id,omitempty"`                // Payment ID
+	OrderNumber      string            `json:"order_number,omitempty"`      // Order ID
+	State            PaymentState      `json:"state,omitempty"`             // Payment status
+	Amount           int64             `json:"amount,omitempty"`            // Amount in cents
+	Currency         string            `json:"currency,omitempty"`          // Payment currency [ISO 4217](http://www.iso.org/iso/home/standards/currency_codes.htm)
+	Payer            Payer             `json:"payer,omitempty"`             // Information about the payer and payment methods
+	Target           Target            `json:"target,omitempty"`            // Payee information
+	AdditionalParams []AdditionalParam `json:"additional_params,omitempty"` // Additional parameters
+	Lang             string            `json:"string,omitempty"`            // Payment gateway language
+	GWURL            string            `json:"gw_url,omitempty"`            // URL for initiation of the payment gate
+	Preauthorization bool              `json:"preauthorization,omitempty"`  // true if the payment should be preauthorized
+	Recurrence       Recurrence        `json:"recurrence,omitempty"`        // Contains object describing recurrence, if the payment should be recurrent
 }
 
+// Create Payment
+// https://doc.gopay.com/#payment-creation
 func CreatePayment(client *Client, body PaymentBody) (*Payment, error) {
+	if body.Target.Goid == 0 || body.Target.Type != "ACCOUNT" {
+		body.Target = Target{
+			Type: "ACCOUNT",
+			Goid: int64(client.goId),
+		}
+	}
+
 	res, err := client.doRequest("/payments/payment", "POST", requestBodyJSON{body: body})
 	if err != nil {
 		return nil, err
@@ -52,6 +65,8 @@ func CreatePayment(client *Client, body PaymentBody) (*Payment, error) {
 	return &payment, nil
 }
 
+// Get Payment
+// https://doc.gopay.com/#payment-status
 func GetPayment(client *Client, ID int64) (*Payment, error) {
 	res, err := client.doRequest(fmt.Sprintf("/payments/payment/%d", ID), "GET", nil)
 	if err != nil {
@@ -68,6 +83,8 @@ func GetPayment(client *Client, ID int64) (*Payment, error) {
 	return &payment, nil
 }
 
+// Refund Payment
+// https://doc.gopay.com/#payment-refund
 func RefundPayment(client *Client, ID int64, amount int) error {
 	body := url.Values{}
 	body.Add("amount", strconv.Itoa(amount))

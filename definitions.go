@@ -2,14 +2,14 @@ package gopay
 
 type PaymentInstrument string
 
-const PAYMENT_CARD = PaymentInstrument("PAYMENT_CARD") // Platební karty
-const BANK_ACCOUNT = PaymentInstrument("BANK_ACCOUNT") // Bankovní převody
+const PAYMENT_CARD = PaymentInstrument("PAYMENT_CARD") // Payment card
+const BANK_ACCOUNT = PaymentInstrument("BANK_ACCOUNT") // Bank account
 const PREMIUM_SMS = PaymentInstrument("PRSMS")         // Premium SMS
-const MPAYMENT = PaymentInstrument("MPAYMENT")         // Mplatba
-const PAYSAFECARD = PaymentInstrument("PAYSAFECARD")   // paysafecard
-const GOPAY = PaymentInstrument("GOPAY")               // GoPay účet
-const PAYPAL = PaymentInstrument("PAYPAL")             // PayPal účet
-const BITCOIN = PaymentInstrument("BITCOIN")           // Platba bitcoiny
+const MPAYMENT = PaymentInstrument("MPAYMENT")         // mPlatba (mobile payment)
+const PAYSAFECARD = PaymentInstrument("PAYSAFECARD")   // PaySafeCard coupon
+const GOPAY = PaymentInstrument("GOPAY")               // GoPay wallet
+const PAYPAL = PaymentInstrument("PAYPAL")             // PayPal wallet
+const BITCOIN = PaymentInstrument("BITCOIN")           // Bitcoin wallet
 const MASTERPASS = PaymentInstrument("MASTERPASS")     // Masterpass
 const GOOGLE_PAY = PaymentInstrument("GPAY")           // Google Pay
 
@@ -65,74 +65,78 @@ const E_SKOK = BankSwift("NBPLPLPW")
 const EUROBANK = BankSwift("SOGEPLPW")
 const POLSKI_BANK_PRZEDSIEBIORCZOSCI_SPOLKA_AKCYJNA = BankSwift("PBPBPLPW")
 
+// https://doc.gopay.com/#bank-account
 type BankAccount struct {
-	Iban          string    `json:"iban,omitempty"`           // Kód IBAN bankovního účtu zákazníka
-	Bic           BankSwift `json:"bic,omitempty"`            // SWIFT kód banky zákazníka
-	Prefix        string    `json:"prefix,omitempty"`         // Předčíslí bankovního účtu zákazníka
-	AccountNumber string    `json:"account_number,omitempty"` // Číslo bankovního účtu zákazníka
-	BankCode      string    `json:"bank_code,omitempty"`      // Kód banky zákazníka
-	AccountName   string    `json:"account_name,omitempty"`   // Jméno majitele bankovního účtu
+	Iban          string    `json:"iban,omitempty"`           // International bank account number
+	Bic           BankSwift `json:"bic,omitempty"`            // Business identification code (SWIFT)
+	Prefix        string    `json:"prefix,omitempty"`         // Bank account prefix
+	AccountNumber string    `json:"account_number,omitempty"` // Bank account number
+	BankCode      string    `json:"bank_code,omitempty"`      // Bank account code
+	AccountName   string    `json:"account_name,omitempty"`   // Bank account name
 }
 
+// https://doc.gopay.com/#payment-card
 type PaymentCard struct {
-	CardNumber        string `json:"card_number,omitempty"`         // Vymaskované číslo platební karty
-	CardExpiration    string `json:"card_expiration,omitempty"`     // Datum expirace
-	CardBrand         string `json:"card_brand,omitempty"`          // Typ platební karty
-	CardIssuerCountry string `json:"card_issuer_country,omitempty"` // Kód země vydavatelské banky
-	CardIssuerBank    string `json:"card_issuer_bank,omitempty"`    // Vydavatelská banka
-	CardToken         string `json:"card_token,omitempty"`          // Token platební karty pro účely identifikační platby
-	Card3dsResult     string `json:"3ds_result,omitempty"`          // 3 není validní začátek struct memberu proto ten prefix Card
+	CardNumber        string `json:"card_number,omitempty"`         // Masked payment card´s number
+	CardExpiration    string `json:"card_expiration,omitempty"`     // Expiration date
+	CardBrand         string `json:"card_brand,omitempty"`          // Payment card´s type
+	CardIssuerCountry string `json:"card_issuer_country,omitempty"` // Country code of issuing bank
+	CardIssuerBank    string `json:"card_issuer_bank,omitempty"`    // Issuing bank
+	CardToken         string `json:"card_token,omitempty"`          // Token for identification payment purposes
+	Card3dsResult     string `json:"3ds_result,omitempty"`          // 3D Secure authorization’s result for identification payment purposes
 }
 
+// https://doc.gopay.com/#contact
 type Contact struct {
-	FirstName   string `json:"first_name,omitempty"`   // Jméno zákazníka
-	LastName    string `json:"last_name,omitempty"`    // Příjmení zákazníka
-	Email       string `json:"email,omitempty"`        // Validní e-mail zákazníka
-	PhoneNumber string `json:"phone_number,omitempty"` // Telefonní číslo zákazníka s předvolbou
-	City        string `json:"city,omitempty"`         // Město zákazníka
-	Street      string `json:"street,omitempty"`       // Ulice zákazníka
-	PostalCode  string `json:"postal_code,omitempty"`  // Poštovní směrovací číslo zákazníka
-	CountryCode string `json:"country_code,omitempty"` // Kód státu zákazníka
+	FirstName   string `json:"first_name,omitempty"`   // First name
+	LastName    string `json:"last_name,omitempty"`    // Last name
+	Email       string `json:"email,omitempty"`        // Valid e-mail
+	PhoneNumber string `json:"phone_number,omitempty"` // Phone number with country code
+	City        string `json:"city,omitempty"`         // City
+	Street      string `json:"street,omitempty"`       // Street
+	PostalCode  string `json:"postal_code,omitempty"`  // Postal code
+	CountryCode string `json:"country_code,omitempty"` // Country code ISO 3166-1 alpha-3
 }
 
+// https://doc.gopay.com/#payer
 type Payer struct {
-	AllowedPaymentInstruments []PaymentInstrument `json:"allowed_payment_instruments,omitempty"` // Pole povolených platebních metod
-	DefaultPaymentInstrument  PaymentInstrument   `json:"default_payment_instrument,omitempty"`  // Preferovaná platební metoda
-	DefaultSwift              BankSwift           `json:"default_swift,omitempty"`               // Preferová banka pokud je default_payment_instrument nastaveno na BANK_ACCOUNT, nastaveno pomocí SWIFT kódu banky
-	AllowedSwifts             []BankSwift         `json:"allowed_swifts,omitempty"`              // Pole povolených kódů bank
-	BankAccount               BankAccount         `json:"bank_account,omitempty"`                // Údaje o bankovním účtu plátce
-	PaymentCard               PaymentCard         `json:"payment_card,omitempty"`                // Údaje o použité platební kartě
-	Contact                   Contact             `json:"contact,omitempty"`                     // Údaje o zákaníkovi
-	VerifyPin                 string              `json:"verify_pin,omitempty"`                  // PIN pro účely [identifikační platby](https://doc.gopay.com/cs/?lang=php#identifikacni-platba)
-	AllowedCardToken          string              `json:"allowed_card_token,omitempty"`          // Token pro účely [identifikační platby](https://doc.gopay.com/cs/?lang=php#identifikacni-platba)
+	AllowedPaymentInstruments []PaymentInstrument `json:"allowed_payment_instruments,omitempty"` // Array of allowed payment methods
+	DefaultPaymentInstrument  PaymentInstrument   `json:"default_payment_instrument,omitempty"`  // Preferred payment method
+	DefaultSwift              BankSwift           `json:"default_swift,omitempty"`               // Preferred bank if default_payment_instrument is set to BANK_ACCOUNT, set by SWIFT code
+	AllowedSwifts             []BankSwift         `json:"allowed_swifts,omitempty"`              // Array of allowed bank codes
+	BankAccount               BankAccount         `json:"bank_account,omitempty"`                // Bank account´s information
+	PaymentCard               PaymentCard         `json:"payment_card,omitempty"`                // Payment card´s information
+	Contact                   Contact             `json:"contact,omitempty"`                     // Customer´s data
+	VerifyPin                 string              `json:"verify_pin,omitempty"`                  // PIN for identification payment purposes
+	AllowedCardToken          string              `json:"allowed_card_token,omitempty"`          // Token for identification payment purposes
 }
 
 type Address struct {
-	Street     string `json:"street,omitempty"`      // Ulice
-	PostalCode string `json:"postal_code,omitempty"` // Poštovní směrovací číslo
-	City       string `json:"city,omitempty"`        // Město
-	Country    string `json:"country,omitempty"`     // Kód státu
+	Street     string `json:"street,omitempty"`      // Street
+	PostalCode string `json:"postal_code,omitempty"` // PostalCode
+	City       string `json:"city,omitempty"`        // City
+	Country    string `json:"country,omitempty"`     // Country code ISO 3166-1 alpha-3
 }
 
 type Accounts struct {
-	Id       int    `json:"id,omitempty"`       // ID účtu
-	Balance  int    `json:"balance,omitempty"`  // Zůstatek účtu
-	Currency string `json:"currency,omitempty"` // Měna, formát měny odpovídá [ISO 4217](http://www.iso.org/iso/home/standards/currency_codes.htm)
+	Id       int    `json:"id,omitempty"`       // Account ID
+	Balance  int    `json:"balance,omitempty"`  // Balance
+	Currency string `json:"currency,omitempty"` // Currency [ISO 4217](http://www.iso.org/iso/home/standards/currency_codes.htm)
 }
 
 type Target struct {
-	Type string `json:"type,omitempty"` // Popis příjemce platby
-	Goid int64  `json:"goid,omitempty"` // Jedinečný identifikátor eshopu v systému platební brány
+	Type string `json:"type,omitempty"` // Always ACCOUNT
+	Goid int64  `json:"goid,omitempty"` // Unique identifier of an e-shop in the payment gateway system
 }
 
 type Callback struct {
-	ReturnURL       string `json:"return_url,omitempty"`       // URL adresa pro návrat na eshop (včetně protokolu)
-	NotificationUrl string `json:"notification_url,omitempty"` // URL adresa pro odeslání asynchronní notifikace v případě změny stavu platby (včetně protokolu)
+	ReturnURL       string `json:"return_url,omitempty"`       // URL address for return to e-shop (with protocol)
+	NotificationUrl string `json:"notification_url,omitempty"` // URL address for sending asynchronous notification in the case of changes in the payment status (with protocol)
 }
 
 type AdditionalParam struct {
-	Name  string `json:"name,omitempty"`  // Název parametru
-	Value string `json:"value,omitempty"` // 	Hodnota volitelného parametru
+	Name  string `json:"name,omitempty"`  // Parameter name
+	Value string `json:"value,omitempty"` // Value of optional parameter
 }
 
 type RecurrenceCycle string
@@ -149,10 +153,10 @@ const STARTED = RecurrenceState("STARTED")
 const STOPPED = RecurrenceState("STOPPED")
 
 type Recurrence struct {
-	RecurrenceCycle  RecurrenceCycle `json:"recurrence_cycle,omitempty"`   // Časový úsek opakování
-	RecurrencePeriod int64           `json:"recurrence_period,omitempty"`  // Perioda opakování opakované platby
-	RecurrenceDateTo string          `json:"recurrence_date_to,omitempty"` // Doba platnosti opakované platby (yyyy-mm-dd)
-	RecurrenceState  RecurrenceState `json:"recurrence_state,omitempty"`   // Popis stavu opakované platby
+	RecurrenceCycle  RecurrenceCycle `json:"recurrence_cycle,omitempty"`   // Time period of recurring
+	RecurrencePeriod int64           `json:"recurrence_period,omitempty"`  // Recurring period of recurring payment
+	RecurrenceDateTo string          `json:"recurrence_date_to,omitempty"` // The period of validity recurring payment (yyyy-mm-dd)
+	RecurrenceState  RecurrenceState `json:"recurrence_state,omitempty"`   // Describes state of recurring payment
 }
 
 type ItemType string
@@ -169,13 +173,13 @@ const FIFTEEN = ItemVatRate(15)
 const TWENTYONE = ItemVatRate(21)
 
 type Items struct {
-	Type       ItemType    `json:"type,omitempty"`        // Typ položky
-	ProductUrl string      `json:"product_url,omitempty"` // URL adresa produktu
-	Ean        string      `json:"ean,omitempty"`         // [EAN kód produktu](https://cs.wikipedia.org/wiki/European_Article_Number)
-	Count      int64       `json:"count,omitempty"`       // Počet položek produktu
-	Name       string      `json:"name,omitempty"`        // Název produktu
-	Amount     int64       `json:"amount,omitempty"`      // Součet cen položek s DPH v haléřích
-	VatRate    ItemVatRate `json:"vat_rate,omitempty"`    // Součet cen položek s DPH v haléřích
+	Type       ItemType    `json:"type,omitempty"`        // Type of row, for registration of sales
+	ProductUrl string      `json:"product_url,omitempty"` // URL address of the product
+	Ean        string      `json:"ean,omitempty"`         // [EAN code of the product](https://en.wikipedia.org/wiki/International_Article_Number)
+	Count      int64       `json:"count,omitempty"`       // Number of items
+	Name       string      `json:"name,omitempty"`        // Product name
+	Amount     int64       `json:"amount,omitempty"`      // Total price of items in cents
+	VatRate    ItemVatRate `json:"vat_rate,omitempty"`    // VAT rate
 }
 
 // TODO: možná anglicky? (GoPay to má taky v čj)
@@ -206,68 +210,68 @@ type EETCode struct {
 
 type PaymentState string
 
-const CREATED = PaymentState("CREATED")                             //	Platba založena
-const PAYMENT_METHOD_CHOSEN = PaymentState("PAYMENT_METHOD_CHOSEN") //	Platební metoda vybrána
-const PAID = PaymentState("PAID")                                   //	Platba zaplacena
-const AUTHORIZED = PaymentState("AUTHORIZED")                       //	Platba předautorizována
-const CANCELED = PaymentState("CANCELED")                           //	Platba zrušena
-const TIMEOUTED = PaymentState("TIMEOUTED")                         //	Vypršelá platnost platby
-const REFUNDED = PaymentState("REFUNDED")                           //	Platba refundována
-const PARTIALLY_REFUNDED = PaymentState("PARTIALLY_REFUNDED")       //	Platba částečně refundována
+const CREATED = PaymentState("CREATED")                             //	Payment created
+const PAYMENT_METHOD_CHOSEN = PaymentState("PAYMENT_METHOD_CHOSEN") //	Payment method confirmed
+const PAID = PaymentState("PAID")                                   //	Payment has already been paid
+const AUTHORIZED = PaymentState("AUTHORIZED")                       //	Payment pre-authorized
+const CANCELED = PaymentState("CANCELED")                           //	Payment declined
+const TIMEOUTED = PaymentState("TIMEOUTED")                         //	The payment has expired
+const REFUNDED = PaymentState("REFUNDED")                           //	Payment refunded
+const PARTIALLY_REFUNDED = PaymentState("PARTIALLY_REFUNDED")       //	Payment partially refunded
 
 var PaymentSecondaryStates = map[int]string{
-	101:  "Čekáme na provedení online platby.",
-	102:  "Čekáme na provedení offline platby.",
-	3001: "Bankovní platba potvrzena avízem.",
-	3002: "Bankovní platba potvrzena výpisem.",
-	3003: "Bankovní platba nebyla potvrzena.",
-	5001: "Schváleno s nulovou částkou",
-	5002: "Zamítnutí platby v autorizačním centru banky zákazníka z důvodu dosažení limitů na platební kartě.",
-	5003: "Zamítnutí platby v autorizačním centru banky zákazníka z důvodu problémů na straně vydavatele platební karty.",
-	5004: "Zamítnutí platby v autorizačním centru banky zákazníka z důvodu problému na straně vydavatele platební karty.",
-	5005: "Zamítnutí platby v autorizačním centru banky zákazníka z důvodu zablokované platební karty.",
-	5006: "Zamítnutí platby v autorizačním centru banky zákazníka z důvodu nedostatku peněžních prostředků na platební kartě.",
-	5007: "Zamítnutí platby v autorizačním centru banky zákazníka z důvodu expirované platební karty.",
-	5008: "Zamítnutí platby v autorizačním centru banky zákazníka z důvodu zamítnutí CVV/CVC kódu.",
-	5009: "Zamítnutí platby v systému 3D Secure banky zákazníka.",
-	5015: "Zamítnutí platby v systému 3D Secure banky zákazníka.",
-	5017: "Zamítnutí platby v systému 3D Secure banky zákazníka.",
-	5018: "Zamítnutí platby v systému 3D Secure banky zákazníka.",
-	5019: "Zamítnutí platby v systému 3D Secure banky zákazníka.",
-	6502: "Zamítnutí platby v systému 3D Secure banky zákazníka.",
-	6504: "Zamítnutí platby v systému 3D Secure banky zákazníka.",
-	5010: "Zamítnutí platby v autorizačním centru banky zákazníka z důvodu problémů na platební kartě.",
-	5014: "Zamítnutí platby v autorizačním centru banky zákazníka z důvodu problémů na platební kartě.",
-	5011: "Zamítnutí platby v autorizačním centru banky zákazníka z důvodu problémů na účtu platební karty.",
-	5036: "Zamítnutí platby v autorizačním centru banky zákazníka z důvodu problémů na účtu platební karty.",
-	5012: "Zamítnutí platby v autorizačním centru banky zákazníka z důvodu technických problémů v autorizačním centru banky zákazníka.",
-	5013: "Zamítnutí platby v autorizačním centru banky zákazníka z důvodu chybného zadání čísla platební karty.",
-	5016: "Zamítnutí platby v autorizačním centru banky zákazníka, platba nebyla povolena na platební kartě zákazníka.",
-	5020: "Neznámá konfigurace",
-	5021: "Zamítnutí platby v autorizačním centru banky zákazníka z důvodu dosažení nastavených limitů na platební kartě.",
-	5022: "Nastal technický problém spojený s autorizačním centrem banky zákazníka.",
-	5023: "Platba nebyla provedena.",
-	5038: "Platba nebyla provedena.",
-	5024: "Platba nebyla provedena. Platební údaje nebyly zadány v časovém limitu na platební bráně.",
-	5025: "Platba nebyla provedena. Konkrétní důvod zamítnutí je sdělen přímo zákazníkovi.",
-	5026: "Platba nebyla provedena. Součet kreditovaných částek překročil uhrazenou částku.",
-	5027: "Platba nebyla provedena. Uživatel není oprávněn k provedení operace.",
-	5028: "Platba nebyla provedena. Částka k úhradě překročila autorizovanou částku.",
-	5029: "Platba zatím nebyla provedena.",
-	5030: "Platba nebyla provedena z důvodu opakovaného zadání platby.",
-	5031: "Při platbě nastal technický problém na straně banky.",
-	5033: "SMS se nepodařilo doručit.",
-	5035: "Platební karta je vydaná v regionu, ve kterém nejsou podporovány platby kartou.",
-	5037: "Držitel platební karty zrušil platbu.",
-	5039: "Platba byla zamítnuta v autorizačním centru banky zákazníka z důvodu zablokované platební karty.",
-	5040: "Duplicitni reversal transakce",
-	5041: "Duplicitní transakce",
-	5042: "Bankovní platba byla zamítnuta.",
-	5043: "Platba zrušena uživatelem.",
-	5044: "SMS byla odeslána. Zatím se ji nepodařilo doručit.",
-	5045: "Platba byla přijata. Platba bude připsána po zpracování v síti Bitcoin.",
-	5046: "Platba nebyla uhrazena v plné výši.",
-	5047: "Platba byla provedena po splatnosti.",
+	101:  "We are waiting for an online payment.",
+	102:  "We are waiting for an offline payment.",
+	3001: "Bank payment confirmed by advice",
+	3002: "Bank payment confirmed by statement.",
+	3003: "Bank payment was not confirmed.",
+	5001: "Approved with zero amount.",
+	5002: "Rejection of the payment in the authorization center of the customer’s bank due to reaching the limits on the payment card.",
+	5003: "Refusal of payment in the authorization center of the customer’s bank due to problems on the part of the payment card issuer.",
+	5004: "Rejection of the payment in the authorization center of the customer’s bank due to a problem on the part of the payment card issuer.",
+	5005: "Rejection of the payment in the authorization center of the customer’s bank due to a blocked payment card.",
+	5006: "Refusal of payment in the authorization center of the customer’s bank due to lack of funds on the payment card.",
+	5007: "Rejection of the payment in the authorization center of the customer’s bank due to the expired payment card.",
+	5008: "Rejection of payment in the authorization center of the customer’s bank due to rejection of the CVV/CVC code.",
+	5009: "Rejection of payment in the customer’s 3D Secure bank system.",
+	5015: "Rejection of payment in the customer’s 3D Secure bank system.",
+	5017: "Rejection of payment in the customer’s 3D Secure bank system.",
+	5018: "Rejection of payment in the customer’s 3D Secure bank system.",
+	5019: "Rejection of payment in the customer’s 3D Secure bank system.",
+	6502: "Rejection of payment in the customer’s 3D Secure bank system.",
+	6504: "Rejection of payment in the customer’s 3D Secure bank system.",
+	5010: "Rejection of the payment in the authorization center of the customer’s bank due to problems on the payment card.",
+	5014: "Rejection of the payment in the authorization center of the customer’s bank due to problems on the payment card.",
+	5011: "Rejection of the payment in the authorization center of the customer’s bank due to problems on the payment card.",
+	5036: "Rejection of the payment in the authorization center of the customer’s bank due to problems on the payment card.",
+	5012: "Rejection of the payment in the authorization center of the customer’s bank due to problems on the payment card.",
+	5013: "Rejection of the payment in the authorization center of the customer’s bank due to problems on the payment card.",
+	5016: "Rejection of the payment in the authorization center of the customer’s bank due to problems on the payment card.",
+	5020: "Unknown configuration",
+	5021: "Rejection of the payment in the authorization center of the customer’s bank due to reaching the set limits on the payment card.",
+	5022: "There was a technical problem associated with the customer’s bank authorization center.",
+	5023: "Payment was not made.",
+	5038: "Payment was not made.",
+	5024: "Payment was not made. Payment details were not entered within the time limit on the payment gateway.",
+	5025: "Payment was not made. The specific reason for rejection is communicated directly to the customer.",
+	5026: "Payment was not made. The sum of the credited amounts exceeded the amount paid.",
+	5027: "Payment was not made. The user is not authorized to perform the operation.",
+	5028: "Payment was not made. The amount to be paid exceeded the authorized amount.",
+	5029: "Payment has not been made yet.",
+	5030: "The payment was not made due to a re-entry.",
+	5031: "There was a technical problem with the payment on the part of the bank.",
+	5033: "SMS could not be delivered.",
+	5035: "The payment card is issued in a region where card payments are not supported.",
+	5037: "The credit card holder canceled the payment.",
+	5039: "The payment was declined at the customer’s bank authorization center due to a blocked credit card.",
+	5040: "Duplicate reversal transactions",
+	5041: "Duplicate transactions",
+	5042: "Bank payment declined.",
+	5043: "Payment canceled by user.",
+	5044: "SMS has been sent. It has not yet been delivered.",
+	5045: "Payment received. Payment will be credited after processing on Bitcoin.",
+	5046: "The payment was not paid in full.",
+	5047: "Payment was made overdue.",
 }
 
 // TODO: groups

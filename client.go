@@ -11,9 +11,8 @@ import (
 	"time"
 )
 
-var GlobalClient Client
-
 type Client struct {
+	goId            int
 	tokenExpiration time.Time
 	token           string
 	clientID        string
@@ -139,11 +138,12 @@ func (c *Client) RefreshToken() error {
 	return nil
 }
 
-func NewClient(id string, secret string, url string) Client {
+func NewClient(id string, secret string, goId int, url string) Client {
 	return Client{
 		tokenExpiration: time.Now(),
 		token:           "",
 		clientSecret:    secret,
+		goId:            goId,
 		URL:             url,
 		clientID:        id,
 	}
