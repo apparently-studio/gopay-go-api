@@ -1,3 +1,3 @@
-module gopay-go-api
+module GoPayGoAPI
 
 go 1.17
