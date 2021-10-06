@@ -1,5 +1,7 @@
 # Unofficial Go SDK for GoPay Payments REST API
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/apparently-studio/gopay-go-api.svg)](https://pkg.go.dev/github.com/apparently-studio/gopay-go-api)
+
 ## Installation
 
 ```
