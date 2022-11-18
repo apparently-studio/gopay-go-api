@@ -67,12 +67,12 @@ const POLSKI_BANK_PRZEDSIEBIORCZOSCI_SPOLKA_AKCYJNA = BankSwift("PBPBPLPW")
 
 // https://doc.gopay.com/#bank-account
 type BankAccount struct {
-	Iban          string    `json:"iban,omitempty"`           // International bank account number
-	Bic           BankSwift `json:"bic,omitempty"`            // Business identification code (SWIFT)
-	Prefix        string    `json:"prefix,omitempty"`         // Bank account prefix
-	AccountNumber string    `json:"account_number,omitempty"` // Bank account number
-	BankCode      string    `json:"bank_code,omitempty"`      // Bank account code
-	AccountName   string    `json:"account_name,omitempty"`   // Bank account name
+	Iban          string     `json:"iban,omitempty"`           // International bank account number
+	Bic           *BankSwift `json:"bic,omitempty"`            // Business identification code (SWIFT)
+	Prefix        string     `json:"prefix,omitempty"`         // Bank account prefix
+	AccountNumber string     `json:"account_number,omitempty"` // Bank account number
+	BankCode      string     `json:"bank_code,omitempty"`      // Bank account code
+	AccountName   string     `json:"account_name,omitempty"`   // Bank account name
 }
 
 // https://doc.gopay.com/#payment-card
@@ -101,12 +101,12 @@ type Contact struct {
 // https://doc.gopay.com/#payer
 type Payer struct {
 	AllowedPaymentInstruments []PaymentInstrument `json:"allowed_payment_instruments,omitempty"` // Array of allowed payment methods
-	DefaultPaymentInstrument  PaymentInstrument   `json:"default_payment_instrument,omitempty"`  // Preferred payment method
-	DefaultSwift              BankSwift           `json:"default_swift,omitempty"`               // Preferred bank if default_payment_instrument is set to BANK_ACCOUNT, set by SWIFT code
+	DefaultPaymentInstrument  *PaymentInstrument  `json:"default_payment_instrument,omitempty"`  // Preferred payment method
+	DefaultSwift              *BankSwift          `json:"default_swift,omitempty"`               // Preferred bank if default_payment_instrument is set to BANK_ACCOUNT, set by SWIFT code
 	AllowedSwifts             []BankSwift         `json:"allowed_swifts,omitempty"`              // Array of allowed bank codes
-	BankAccount               BankAccount         `json:"bank_account,omitempty"`                // Bank account´s information
-	PaymentCard               PaymentCard         `json:"payment_card,omitempty"`                // Payment card´s information
-	Contact                   Contact             `json:"contact,omitempty"`                     // Customer´s data
+	BankAccount               *BankAccount        `json:"bank_account,omitempty"`                // Bank account´s information
+	PaymentCard               *PaymentCard        `json:"payment_card,omitempty"`                // Payment card´s information
+	Contact                   *Contact            `json:"contact,omitempty"`                     // Customer´s data
 	VerifyPin                 string              `json:"verify_pin,omitempty"`                  // PIN for identification payment purposes
 	AllowedCardToken          string              `json:"allowed_card_token,omitempty"`          // Token for identification payment purposes
 }
