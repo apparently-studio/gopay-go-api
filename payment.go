@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-// Payment body used when creating Payment.
+// Payment body used when creating Payment..
 type PaymentBody struct {
 	Payer            *Payer            `json:"payer,omitempty"`             // Payment method settings and payer information
 	Target           *Target           `json:"target,omitempty"`            // Payee information
