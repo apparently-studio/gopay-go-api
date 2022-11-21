@@ -101,7 +101,7 @@ type Contact struct {
 // https://doc.gopay.com/#payer
 type Payer struct {
 	AllowedPaymentInstruments []PaymentInstrument `json:"allowed_payment_instruments,omitempty"` // Array of allowed payment methods
-	DefaultPaymentInstrument  *PaymentInstrument  `json:"default_payment_instrument,omitempty"`  // Preferred payment method
+	DefaultPaymentInstrument  PaymentInstrument   `json:"default_payment_instrument,omitempty"`  // Preferred payment method
 	DefaultSwift              *BankSwift          `json:"default_swift,omitempty"`               // Preferred bank if default_payment_instrument is set to BANK_ACCOUNT, set by SWIFT code
 	AllowedSwifts             []BankSwift         `json:"allowed_swifts,omitempty"`              // Array of allowed bank codes
 	BankAccount               *BankAccount        `json:"bank_account,omitempty"`                // Bank account´s information
